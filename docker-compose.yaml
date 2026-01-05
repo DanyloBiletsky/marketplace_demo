@@ -1,0 +1,8 @@
+services:
+  marketplace_demo:
+    image: marketplace_demo:latest
+    build: .
+    restart: always
+    ports:
+      - "8081:8081"
+    env_file: .env

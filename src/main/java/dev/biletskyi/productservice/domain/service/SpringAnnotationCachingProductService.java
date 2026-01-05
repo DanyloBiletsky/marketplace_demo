@@ -1,0 +1,75 @@
+package dev.biletskyi.productservice.domain.service;
+
+import dev.biletskyi.productservice.api.ProductUpdateRequest;
+import dev.biletskyi.productservice.api.ProductCreateRequest;
+import dev.biletskyi.productservice.domain.db.Product;
+import dev.biletskyi.productservice.domain.db.ProductRepository;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.*;
+import org.springframework.stereotype.Service;
+
+/*
+Spring Cache Mode
+ */
+@Slf4j
+@Service
+@AllArgsConstructor
+public class SpringAnnotationCachingProductService implements ProductService {
+    private final ProductRepository productRepository;
+
+    @Override
+    public Product create(ProductCreateRequest createRequest) {
+        log.info("Creating product in DB: {}", createRequest.name());
+        Product product = Product.builder()
+                .name(createRequest.name())
+                .price(createRequest.price())
+                .description(createRequest.description())
+                .build();
+        return productRepository.save(product);
+    }
+
+    @CacheEvict(
+            value = "product",
+            key = "#id"
+    )
+    @Override
+    public Product update(Long id, ProductUpdateRequest updateRequest) {
+        log.info("Updating product in DB: {}", id);
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found: " + id));
+
+        if (updateRequest.price() != null) {
+            product.setPrice(updateRequest.price());
+        }
+        if (updateRequest.description() != null) {
+            product.setDescription(updateRequest.description());
+        }
+
+        return productRepository.save(product);
+    }
+
+    @Cacheable(
+            value = "product",
+            key = "#id"
+    )
+    @Override
+    public Product getById(Long id) {
+        log.info("Getting product from DB: id={}", id);
+        return productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found: " + id));
+    }
+
+    @CacheEvict(
+            value = "product",
+            key = "#id"
+    )
+    @Override
+    public void delete(Long id) {
+        log.info("Deleting product from DB: {}", id);
+        if (!productRepository.existsById(id)) {
+            throw new RuntimeException("Product not found: " + id);
+        }
+        productRepository.deleteById(id);
+    }
+}
