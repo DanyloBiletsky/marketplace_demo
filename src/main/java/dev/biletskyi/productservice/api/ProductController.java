@@ -55,7 +55,6 @@ public class ProductController {
             @PathVariable("id") Long id,
             @RequestBody ProductUpdateRequest request,
             @RequestParam(value = "cacheMode", defaultValue = "NONE_CACHE") CacheMode cacheMode
-
     ) {
         log.info("Updating product {} with cacheMode={}", id, cacheMode);
 
