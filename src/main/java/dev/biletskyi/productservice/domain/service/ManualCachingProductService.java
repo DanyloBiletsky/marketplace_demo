@@ -94,7 +94,7 @@ public class ManualCachingProductService implements ProductService {
         //deleting from DB:
         productRepository.deleteById(id);
 
-        //deleting from cache:
+        //Инвалидация кэша: deleting from cache
         String cacheKey = CACHE_KEY_PREFIX + id;
         redisTemplate.delete(cacheKey);
 

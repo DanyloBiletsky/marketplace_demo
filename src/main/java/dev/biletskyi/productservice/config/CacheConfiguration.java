@@ -19,7 +19,9 @@ import java.time.Duration;
 @EnableCaching
 @Configuration
 public class CacheConfiguration {
+
     @Bean
+    //удобный RedisTemplate<Тип ключа, Тип значения>
     public RedisTemplate<String, Product> redisProductTemplate(
             RedisConnectionFactory redisConnectionFactory,
             ObjectMapper objectMapper
@@ -27,9 +29,12 @@ public class CacheConfiguration {
         RedisTemplate<String, Product> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
 
+        //указываем, как сериализировать ключи
         redisTemplate.setKeySerializer(new StringRedisSerializer());
 
+        //создаем JSON сериализатор
         var serializer = new Jackson2JsonRedisSerializer<>(objectMapper, Product.class);
+        //указываем, как сериализировать значения
         redisTemplate.setValueSerializer(serializer);
 
         redisTemplate.afterPropertiesSet();
